@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Blogger Editor</title>
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           MATERIAL DESIGN 3 - ANDROID APP STYLE EDITOR
+           ═══════════════════════════════════════════════════════════ */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            /* Material Design 3 Colors */
+            --md-primary: #6750A4;
+            --md-primary-container: #EADDFF;
+            --md-on-primary: #FFFFFF;
+            --md-on-primary-container: #21005D;
+            --md-secondary: #625B71;
+            --md-secondary-container: #E8DEF8;
+            --md-surface: #FFFBFE;
+            --md-surface-variant: #E7E0EC;
+            --md-on-surface: #1C1B1F;
+            --md-on-surface-variant: #49454F;
+            --md-outline: #79747E;
+            --md-shadow: rgba(0, 0, 0, 0.15);
+            --md-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+            --md-elevation-2: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 6px 2px rgba(0, 0, 0, 0.15);
+            --md-elevation-3: 0 4px 8px 3px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.3);
+            
+            /* Spacing (8dp grid) */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            
+            /* Touch targets */
+            --touch-target: 48px;
+        }
+
+        /* Dark Theme */
+        .dark-theme {
+            --md-primary: #D0BCFF;
+            --md-primary-container: #4F378B;
+            --md-on-primary: #371E73;
+            --md-on-primary-container: #EADDFF;
+            --md-secondary: #CCC2DC;
+            --md-secondary-container: #4A4458;
+            --md-surface: #1C1B1F;
+            --md-surface-variant: #49454F;
+            --md-on-surface: #E6E1E5;
+            --md-on-surface-variant: #CAC4D0;
+            --md-outline: #938F99;
+        }
+
+        body {
+            font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--md-surface);
+            color: var(--md-on-surface);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           TOP APP BAR (Minimal)
+           ═══════════════════════════════════════════════════════════ */
+
+        .app-bar {
+            background: var(--md-surface);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 var(--spacing-sm);
+            box-shadow: var(--md-elevation-1);
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0;
+        }
+
+        .app-bar-title {
+            font-size: 22px;
+            font-weight: 400;
+            letter-spacing: 0;
+            margin-left: var(--spacing-sm);
+            flex: 1;
+            color: var(--md-on-surface);
+        }
+
+        .icon-btn {
+            width: var(--touch-target);
+            height: var(--touch-target);
+            border: none;
+            background: transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: background 200ms;
+            color: var(--md-on-surface-variant);
+        }
+
+        .icon-btn:active {
+            background: rgba(103, 80, 164, 0.12);
+        }
+
+        .icon-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(103, 80, 164, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .icon-btn:active::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           EDITOR AREA (Maximum Space)
+           ═══════════════════════════════════════════════════════════ */
+
+        .editor-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: var(--md-surface);
+            padding: var(--spacing-md);
+        }
+
+        #title-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 24px;
+            font-weight: 400;
+            color: var(--md-on-surface);
+            padding: var(--spacing-md) 0;
+            outline: none;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        #title-input::placeholder {
+            color: var(--md-on-surface-variant);
+            opacity: 0.6;
+        }
+
+        #editor {
+            min-height: calc(100vh - 200px);
+            outline: none;
+            font-size: 16px;
+            line-height: 1.75;
+            color: var(--md-on-surface);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        #editor:empty::before {
+            content: 'Start writing your story...';
+            color: var(--md-on-surface-variant);
+            opacity: 0.5;
+        }
+
+        #editor:focus::before {
+            content: '';
+        }
+
+        /* Editor Content Styles */
+        #editor h1, #editor h2, #editor h3 {
+            margin: var(--spacing-lg) 0 var(--spacing-md) 0;
+            font-weight: 500;
+        }
+        #editor h1 { font-size: 28px; }
+        #editor h2 { font-size: 24px; }
+        #editor h3 { font-size: 20px; }
+        #editor p { margin: var(--spacing-md) 0; }
+        #editor ul, #editor ol { 
+            margin: var(--spacing-md) 0; 
+            padding-left: var(--spacing-lg); 
+        }
+        #editor li { margin: var(--spacing-sm) 0; }
+        #editor blockquote {
+            border-left: 4px solid var(--md-primary);
+            padding-left: var(--spacing-md);
+            margin: var(--spacing-md) 0;
+            font-style: italic;
+            color: var(--md-on-surface-variant);
+        }
+        #editor img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            margin: var(--spacing-md) 0;
+        }
+        #editor a {
+            color: var(--md-primary);
+            text-decoration: none;
+        }
+
+        /* Responsive Table */
+        .responsive-table {
+            overflow-x: auto;
+            margin: var(--spacing-md) 0;
+            border-radius: 12px;
+            background: var(--md-surface-variant);
+        }
+        .responsive-table table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--md-surface);
+        }
+        .responsive-table th {
+            background: var(--md-primary-container);
+            color: var(--md-on-primary-container);
+            font-weight: 500;
+            text-align: left;
+            padding: var(--spacing-md);
+        }
+        .responsive-table td {
+            padding: var(--spacing-md);
+            border-bottom: 1px solid var(--md-outline);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           FLOATING ACTION BUTTON (FAB)
+           ═══════════════════════════════════════════════════════════ */
+
+        .fab-container {
+            position: fixed;
+            bottom: var(--spacing-md);
+            right: var(--spacing-md);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+            z-index: 100;
+        }
+
+        .fab {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: var(--md-primary-container);
+            color: var(--md-on-primary-container);
+            border: none;
+            box-shadow: var(--md-elevation-3);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fab:active {
+            transform: scale(0.95);
+            box-shadow: var(--md-elevation-2);
+        }
+
+        .fab-primary {
+            background: var(--md-primary);
+            color: var(--md-on-primary);
+            width: 96px;
+            border-radius: 28px;
+            font-size: 15px;
+            font-weight: 500;
+            gap: var(--spacing-sm);
+        }
+
+        .fab.hidden {
+            transform: scale(0);
+            opacity: 0;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           BOTTOM SHEET (Toolbar)
+           ═══════════════════════════════════════════════════════════ */
+
+        .bottom-sheet {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--md-surface);
+            border-radius: 28px 28px 0 0;
+            box-shadow: 0 -4px 16px var(--md-shadow);
+            transform: translateY(100%);
+            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .bottom-sheet.open {
+            transform: translateY(0);
+        }
+
+        .bottom-sheet-handle {
+            width: 32px;
+            height: 4px;
+            background: var(--md-on-surface-variant);
+            opacity: 0.4;
+            border-radius: 2px;
+            margin: var(--spacing-md) auto var(--spacing-sm);
+        }
+
+        .bottom-sheet-content {
+            padding: 0 var(--spacing-md) var(--spacing-lg);
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--md-on-surface-variant);
+            margin: var(--spacing-lg) 0 var(--spacing-sm);
+        }
+
+        .toolbar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+            gap: var(--spacing-sm);
+        }
+
+        .tool-btn {
+            background: var(--md-surface-variant);
+            border: none;
+            border-radius: 12px;
+            padding: var(--spacing-md) var(--spacing-sm);
+            min-height: 64px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            color: var(--md-on-surface);
+            transition: all 150ms;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .tool-btn:active {
+            background: var(--md-secondary-container);
+            transform: scale(0.95);
+        }
+
+        .tool-btn .icon {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           MODAL DIALOG (Material Design)
+           ═══════════════════════════════════════════════════════════ */
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            padding: var(--spacing-md);
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--md-surface);
+            border-radius: 28px;
+            padding: var(--spacing-lg);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--md-elevation-3);
+            transform: scale(0.9);
+            opacity: 0;
+            transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-overlay.open .modal-card {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 400;
+            margin-bottom: var(--spacing-lg);
+            color: var(--md-on-surface);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--md-outline);
+            border-radius: 12px;
+            background: var(--md-surface);
+            color: var(--md-on-surface);
+            font-size: 16px;
+            margin-bottom: var(--spacing-md);
+            font-family: inherit;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--md-primary);
+            border-width: 2px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: flex-end;
+            margin-top: var(--spacing-lg);
+        }
+
+        .btn {
+            height: var(--touch-target);
+            padding: 0 var(--spacing-lg);
+            border: none;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 150ms;
+        }
+
+        .btn-text {
+            background: transparent;
+            color: var(--md-primary);
+        }
+
+        .btn-filled {
+            background: var(--md-primary);
+            color: var(--md-on-primary);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           SNACKBAR (Toast Messages)
+           ═══════════════════════════════════════════════════════════ */
+
+        .snackbar {
+            position: fixed;
+            bottom: 80px;
+            left: var(--spacing-md);
+            right: var(--spacing-md);
+            background: var(--md-on-surface);
+            color: var(--md-surface);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: 8px;
+            box-shadow: var(--md-elevation-2);
+            transform: translateY(120%);
+            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 250;
+            font-size: 14px;
+        }
+
+        .snackbar.show {
+            transform: translateY(0);
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           DRAWER (Side Menu)
+           ═══════════════════════════════════════════════════════════ */
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 150;
+        }
+
+        .drawer-overlay.open {
+            display: block;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 320px;
+            max-width: 85vw;
+            background: var(--md-surface);
+            box-shadow: -4px 0 16px var(--md-shadow);
+            transform: translateX(100%);
+            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 160;
+            overflow-y: auto;
+        }
+
+        .drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--md-outline);
+        }
+
+        .drawer-title {
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--md-on-surface);
+        }
+
+        .drawer-section {
+            padding: var(--spacing-md);
+        }
+
+        .drawer-item {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: none;
+            background: transparent;
+            text-align: left;
+            font-size: 16px;
+            color: var(--md-on-surface);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 150ms;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .drawer-item:active {
+            background: var(--md-secondary-container);
+        }
+
+        .blog-select {
+            width: 100%;
+            padding: var(--spacing-md);
+            border: 1px solid var(--md-outline);
+            border-radius: 12px;
+            background: var(--md-surface);
+            color: var(--md-on-surface);
+            font-size: 16px;
+            margin: var(--spacing-sm) 0;
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           RESPONSIVE & ACCESSIBILITY
+           ═══════════════════════════════════════════════════════════ */
+
+        @media (max-width: 600px) {
+            .editor-container {
+                padding: var(--spacing-sm);
+            }
+            
+            #title-input {
+                font-size: 20px;
+            }
+            
+            #editor {
+                font-size: 15px;
+            }
+        }
+
+        /* High Contrast & Accessibility */
+        @media (prefers-contrast: high) {
+            .tool-btn, .btn {
+                border: 2px solid var(--md-outline);
+            }
+        }
+
+        /* Reduced Motion */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Loading State */
+        .loading {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* Hidden Utility */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         TOP APP BAR
+         ═══════════════════════════════════════════════════════════ -->
+    <header class="app-bar">
+        <button class="icon-btn" onclick="toggleDrawer()" aria-label="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+            </svg>
+        </button>
+        <h1 class="app-bar-title">New Post</h1>
+        <button class="icon-btn" onclick="toggleTheme()" aria-label="Toggle theme">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+            </svg>
+        </button>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         EDITOR AREA (Maximum Space)
+         ═══════════════════════════════════════════════════════════ -->
+    <main class="editor-container">
+        <input type="text" id="title-input" placeholder="Title" aria-label="Post title">
+        <div id="editor" contenteditable="true" role="textbox" aria-multiline="true" 
+             aria-label="Post content editor" spellcheck="true"></div>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         FLOATING ACTION BUTTONS
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="fab-container">
+        <button class="fab" onclick="openBottomSheet()" aria-label="Format text">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M14.06 9l.94-2.06L17.06 6l-2.06-.94L14.06 3l-.94 2.06L11.06 6l2.06.94zM4 14l.94-2.06L7 11l-2.06-.94L4 8l-.94 2.06L1 11l2.06.94zm4.5-5l1.09-2.41L12 5.5 9.59 4.41 8.5 2 7.41 4.41 5 5.5l2.41 1.09L8.5 9zm-4 11.5l6-6.01 4 4L23 8.93l-1.41-1.41-7.09 7.97-4-4L3 19z"/>
+            </svg>
+        </button>
+        <button class="fab fab-primary" onclick="publish()" aria-label="Publish post">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+            Publish
+        </button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         BOTTOM SHEET (Formatting Toolbar)
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="bottom-sheet" id="bottomSheet">
+        <div class="bottom-sheet-handle"></div>
+        <div class="bottom-sheet-content">
+            
+            <h2 class="section-title">Text Formatting</h2>
+            <div class="toolbar-grid">
+                <button class="tool-btn" onclick="execCmd('bold')">
+                    <span class="icon"><b>B</b></span>
+                    <span>Bold</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('italic')">
+                    <span class="icon"><i>I</i></span>
+                    <span>Italic</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('underline')">
+                    <span class="icon"><u>U</u></span>
+                    <span>Underline</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('strikeThrough')">
+                    <span class="icon"><s>S</s></span>
+                    <span>Strike</span>
+                </button>
+            </div>
+
+            <h2 class="section-title">Headings</h2>
+            <div class="toolbar-grid">
+                <button class="tool-btn" onclick="execCmd('formatBlock','h1')">
+                    <span class="icon">H1</span>
+                    <span>Heading 1</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('formatBlock','h2')">
+                    <span class="icon">H2</span>
+                    <span>Heading 2</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('formatBlock','h3')">
+                    <span class="icon">H3</span>
+                    <span>Heading 3</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('formatBlock','p')">
+                    <span class="icon">P</span>
+                    <span>Paragraph</span>
+                </button>
+            </div>
+
+            <h2 class="section-title">Lists & Alignment</h2>
+            <div class="toolbar-grid">
+                <button class="tool-btn" onclick="execCmd('insertUnorderedList')">
+                    <span class="icon">•</span>
+                    <span>Bullet List</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('insertOrderedList')">
+                    <span class="icon">1.</span>
+                    <span>Number List</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('justifyLeft')">
+                    <span class="icon">≡</span>
+                    <span>Align Left</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('justifyCenter')">
+                    <span class="icon">≡</span>
+                    <span>Center</span>
+                </button>
+            </div>
+
+            <h2 class="section-title">Insert Elements</h2>
+            <div class="toolbar-grid">
+                <button class="tool-btn" onclick="openModal('linkModal')">
+                    <span class="icon">🔗</span>
+                    <span>Link</span>
+                </button>
+                <button class="tool-btn" onclick="openModal('imageModal')">
+                    <span class="icon">🖼</span>
+                    <span>Image</span>
+                </button>
+                <button class="tool-btn" onclick="openModal('tableModal')">
+                    <span class="icon">⊞</span>
+                    <span>Table</span>
+                </button>
+                <button class="tool-btn" onclick="execCmd('formatBlock','blockquote')">
+                    <span class="icon">"</span>
+                    <span>Quote</span>
+                </button>
+            </div>
+
+            <h2 class="section-title">Actions</h2>
+            <div class="toolbar-grid">
+                <button class="tool-btn" onclick="execCmd('removeFormat')">
+                    <span class="icon">✕</span>
+                    <span>Clear Format</span>
+                </button>
+                <button class="tool-btn" onclick="saveDraft()">
+                    <span class="icon">💾</span>
+                    <span>Save Draft</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         DRAWER (Settings & Blog Selection)
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+    <nav class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h2 class="drawer-title">Settings</h2>
+        </div>
+        <div class="drawer-section">
+            <button class="drawer-item" id="authBtn" onclick="signIn()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                </svg>
+                Sign In with Google
+            </button>
+            <select id="blogSelect" class="blog-select hidden" aria-label="Select blog">
+                <option value="">Select a blog...</option>
+            </select>
+        </div>
+        <div class="drawer-section">
+            <button class="drawer-item" onclick="saveDraft()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
+                </svg>
+                Save as Draft
+            </button>
+            <button class="drawer-item" onclick="publish()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+                Publish Post
+            </button>
+        </div>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MODALS (Link, Image, Table)
+         ═══════════════════════════════════════════════════════════ -->
+    
+    <!-- Link Modal -->
+    <div class="modal-overlay" id="linkModal">
+        <div class="modal-card">
+            <h2 class="modal-title">Insert Link</h2>
+            <input type="text" id="linkText" class="input-field" placeholder="Link text">
+            <input type="url" id="linkUrl" class="input-field" placeholder="https://example.com">
+            <div class="modal-actions">
+                <button class="btn btn-text" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-filled" onclick="createLink()">Insert</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal-overlay" id="imageModal">
+        <div class="modal-card">
+            <h2 class="modal-title">Insert Image</h2>
+            <input type="url" id="imageUrl" class="input-field" placeholder="Image URL">
+            <input type="text" id="imageAlt" class="input-field" placeholder="Alt text (accessibility)">
+            <div class="modal-actions">
+                <button class="btn btn-text" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-filled" onclick="createImage()">Insert</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Modal -->
+    <div class="modal-overlay" id="tableModal">
+        <div class="modal-card">
+            <h2 class="modal-title">Insert Table</h2>
+            <input type="number" id="tableRows" class="input-field" placeholder="Rows" value="3" min="1" max="20">
+            <input type="number" id="tableCols" class="input-field" placeholder="Columns" value="3" min="1" max="10">
+            <div class="modal-actions">
+                <button class="btn btn-text" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-filled" onclick="createTable()">Insert</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snackbar -->
+    <div class="snackbar" id="snackbar"></div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         JAVASCRIPT
+         ═══════════════════════════════════════════════════════════ -->
+    <script>
+        const CLIENT_ID = '942968999133-nuldtmg604hjfogobnpeaq55vhd0v4tr.apps.googleusercontent.com';
+        const SCOPES = 'https://www.googleapis.com/auth/blogger';
+        let accessToken = null;
+        let blogs = [];
+        let lastSelection = null;
+
+        // ═══ GOOGLE AUTH ═══
+        function loadGoogleAPI() {
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.onload = initializeGoogleSignIn;
+            document.head.appendChild(script);
+        }
+
+        function initializeGoogleSignIn() {
+            google.accounts.id.initialize({
+                client_id: CLIENT_ID,
+                callback: () => {}
+            });
+        }
+
+        function signIn() {
+            const client = google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: (response) => {
+                    if (response.access_token) {
+                        accessToken = response.access_token;
+                        onSignIn();
+                    }
+                }
+            });
+            client.requestAccessToken();
+        }
+
+        async function onSignIn() {
+            document.getElementById('authBtn').innerHTML = `
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                </svg>
+                Signed In
+            `;
+            await loadUserBlogs();
+            showSnackbar('Signed in successfully', 'success');
+            toggleDrawer();
+        }
+
+        async function loadUserBlogs() {
+            try {
+                const response = await fetch('https://www.googleapis.com/blogger/v3/users/self/blogs', {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                const data = await response.json();
+                blogs = data.items || [];
+                
+                const select = document.getElementById('blogSelect');
+                select.innerHTML = '<option value="">Select a blog...</option>';
+                blogs.forEach(blog => {
+                    const option = document.createElement('option');
+                    option.value = blog.id;
+                    option.textContent = blog.name;
+                    select.appendChild(option);
+                });
+                select.classList.remove('hidden');
+            } catch (error) {
+                showSnackbar('Error loading blogs', 'error');
+            }
+        }
+
+        // ═══ EDITOR COMMANDS ═══
+        function execCmd(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('editor').focus();
+            closeBottomSheet();
+        }
+
+        function saveSelection() {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                lastSelection = selection.getRangeAt(0);
+            }
+        }
+
+        function restoreSelection() {
+            if (lastSelection) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(lastSelection);
+            }
+        }
+
+        function insertHTML(html) {
+            restoreSelection();
+            document.execCommand('insertHTML', false, html);
+        }
+
+        // ═══ BOTTOM SHEET ═══
+        function openBottomSheet() {
+            saveSelection();
+            document.getElementById('bottomSheet').classList.add('open');
+        }
+
+        function closeBottomSheet() {
+            document.getElementById('bottomSheet').classList.remove('open');
+        }
+
+        function toggleBottomSheet() {
+            const sheet = document.getElementById('bottomSheet');
+            if (sheet.classList.contains('open')) {
+                closeBottomSheet();
+            } else {
+                openBottomSheet();
+            }
+        }
+
+        // ═══ DRAWER ═══
+        function toggleDrawer() {
+            document.getElementById('drawer').classList.toggle('open');
+            document.getElementById('drawerOverlay').classList.toggle('open');
+        }
+
+        // ═══ MODALS ═══
+        function openModal(modalId) {
+            saveSelection();
+            document.getElementById(modalId).classList.add('open');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.classList.remove('open');
+            });
+        }
+
+        // ═══ CREATE ELEMENTS ═══
+        function createLink() {
+            const text = document.getElementById('linkText').value;
+            const url = document.getElementById('linkUrl').value;
+            if (!url) {
+                showSnackbar('Please enter a URL', 'error');
+                return;
+            }
+            insertHTML(`<a href="${url}" target="_blank" rel="noopener">${text || url}</a>`);
+            closeModal();
+            document.getElementById('linkText').value = '';
+            document.getElementById('linkUrl').value = '';
+        }
+
+        function createImage() {
+            const url = document.getElementById('imageUrl').value;
+            const alt = document.getElementById('imageAlt').value;
+            if (!url) {
+                showSnackbar('Please enter an image URL', 'error');
+                return;
+            }
+            insertHTML(`<div style="text-align:center;margin:16px 0;">
+                <img src="${url}" alt="${alt || 'Image'}" style="max-width:100%;border-radius:12px;">
+            </div><p><br></p>`);
+            closeModal();
+            document.getElementById('imageUrl').value = '';
+            document.getElementById('imageAlt').value = '';
+        }
+
+        function createTable() {
+            const rows = parseInt(document.getElementById('tableRows').value);
+            const cols = parseInt(document.getElementById('tableCols').value);
+            if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1) {
+                showSnackbar('Invalid table size', 'error');
+                return;
+            }
+            
+            let html = '<div class="responsive-table"><table><thead><tr>';
+            for (let i = 0; i < cols; i++) {
+                html += `<th contenteditable="true">Header ${i + 1}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+            for (let i = 0; i < rows; i++) {
+                html += '<tr>';
+                for (let j = 0; j < cols; j++) {
+                    html += '<td contenteditable="true">Data</td>';
+                }
+                html += '</tr>';
+            }
+            html += '</tbody></table></div><p><br></p>';
+            insertHTML(html);
+            closeModal();
+        }
+
+        // ═══ PUBLISH / DRAFT ═══
+        async function publish() {
+            await publishPost(false);
+        }
+
+        async function saveDraft() {
+            await publishPost(true);
+        }
+
+        async function publishPost(isDraft) {
+            const title = document.getElementById('title-input').value.trim();
+            const content = document.getElementById('editor').innerHTML.trim();
+            const blogId = document.getElementById('blogSelect').value;
+
+            if (!title || !content) {
+                showSnackbar('Title and content required', 'error');
+                return;
+            }
+            if (!blogId) {
+                showSnackbar('Please select a blog', 'error');
+                toggleDrawer();
+                return;
+            }
+            if (!accessToken) {
+                showSnackbar('Please sign in first', 'error');
+                toggleDrawer();
+                return;
+            }
+
+            const post = {
+                kind: 'blogger#post',
+                blog: { id: blogId },
+                title: title,
+                content: formatForBlogger(content)
+            };
+
+            try {
+                showSnackbar('Publishing...', 'info');
+                const url = `https://www.googleapis.com/blogger/v3/blogs/${blogId}/posts${isDraft ? '?isDraft=true' : ''}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(post)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showSnackbar(isDraft ? 'Saved as draft ✓' : 'Published successfully ✓', 'success');
+                    if (!isDraft && result.url) {
+                        setTimeout(() => window.open(result.url, '_blank'), 1000);
+                    }
+                } else {
+                    const error = await response.json();
+                    showSnackbar(`Failed: ${error.error.message}`, 'error');
+                }
+            } catch (error) {
+                showSnackbar('Error: ' + error.message, 'error');
+            }
+        }
+
+        function formatForBlogger(html) {
+            const tableCSS = `<style>
+                .responsive-table{overflow-x:auto;margin:20px 0;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+                .responsive-table table{width:100%;min-width:600px;border-collapse:collapse;font-size:15px;line-height:1.5;}
+                .responsive-table th{background:#f5f5f5;color:#333;font-weight:600;text-align:left;padding:12px;}
+                .responsive-table td{padding:12px;border-bottom:1px solid #ddd;}
+                .responsive-table tr:hover{background:#f9f9f9;}
+                @media(max-width:768px){.responsive-table table{font-size:14px;}}
+            </style>`;
+            
+            const wrapped = html.replace(/<table/g, '<div class="responsive-table"><table')
+                               .replace(/<\/table>/g, '</table></div>');
+            return `<div style="max-width:100%;word-wrap:break-word;">${tableCSS}${wrapped}</div>`;
+        }
+
+        // ═══ THEME TOGGLE ═══
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        // ═══ SNACKBAR ═══
+        function showSnackbar(message, type = 'info') {
+            const snackbar = document.getElementById('snackbar');
+            snackbar.textContent = message;
+            snackbar.classList.add('show');
+            setTimeout(() => {
+                snackbar.classList.remove('show');
+            }, 3000);
+        }
+
+        // ═══ EVENT LISTENERS ═══
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGoogleAPI();
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            }
+
+            // Editor selection tracking
+            const editor = document.getElementById('editor');
+            editor.addEventListener('mouseup', saveSelection);
+            editor.addEventListener('keyup', saveSelection);
+
+            // Close bottom sheet on swipe down
+            let touchStartY = 0;
+            const sheet = document.getElementById('bottomSheet');
+            sheet.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            });
+            sheet.addEventListener('touchmove', (e) => {
+                const touchY = e.touches[0].clientY;
+                const diff = touchY - touchStartY;
+                if (diff > 50) {
+                    closeBottomSheet();
+                }
+            });
+
+            // Close modals on overlay click
+            document.querySelectorAll('.modal-overlay').forEach(overlay => {
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        closeModal();
+                    }
+                });
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    closeBottomSheet();
+                    if (document.getElementById('drawer').classList.contains('open')) {
+                        toggleDrawer();
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
