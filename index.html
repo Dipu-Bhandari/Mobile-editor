@@ -133,6 +133,16 @@
             height: 100%;
         }
 
+        /* Publish button highlight */
+        .icon-btn.publish-btn {
+            background: var(--md-primary);
+            color: var(--md-on-primary);
+        }
+
+        .icon-btn.publish-btn:active {
+            background: var(--md-primary-container);
+        }
+
         /* ═══════════════════════════════════════════════════════════
            EDITOR AREA (Maximum Space)
            ═══════════════════════════════════════════════════════════ */
@@ -239,7 +249,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════
-           FLOATING ACTION BUTTON (FAB)
+           FLOATING ACTION BUTTON (FAB) - ONLY FORMAT BUTTON NOW
            ═══════════════════════════════════════════════════════════ */
 
         .fab-container {
@@ -273,16 +283,6 @@
         .fab:active {
             transform: scale(0.95);
             box-shadow: var(--md-elevation-2);
-        }
-
-        .fab-primary {
-            background: var(--md-primary);
-            color: var(--md-on-primary);
-            width: 96px;
-            border-radius: 28px;
-            font-size: 15px;
-            font-weight: 500;
-            gap: var(--spacing-sm);
         }
 
         .fab.hidden {
@@ -466,7 +466,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════
-           SNACKBAR (Toast Messages)
+           SNACKBAR (Toast Messages) - FIXED VERSION
            ═══════════════════════════════════════════════════════════ */
 
         .snackbar {
@@ -479,14 +479,19 @@
             padding: var(--spacing-md) var(--spacing-lg);
             border-radius: 8px;
             box-shadow: var(--md-elevation-2);
-            transform: translateY(120%);
-            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(150px);
+            opacity: 0;
+            transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), 
+                        opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 250;
             font-size: 14px;
+            pointer-events: none;
         }
 
         .snackbar.show {
             transform: translateY(0);
+            opacity: 1;
+            pointer-events: auto;
         }
 
         /* ═══════════════════════════════════════════════════════════
@@ -636,6 +641,11 @@
                 <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
             </svg>
         </button>
+        <button class="icon-btn publish-btn" onclick="publish()" aria-label="Publish post">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+        </button>
     </header>
 
     <!-- ═══════════════════════════════════════════════════════════
@@ -648,19 +658,13 @@
     </main>
 
     <!-- ═══════════════════════════════════════════════════════════
-         FLOATING ACTION BUTTONS
+         FLOATING ACTION BUTTON (Only Format Button)
          ═══════════════════════════════════════════════════════════ -->
     <div class="fab-container">
         <button class="fab" onclick="openBottomSheet()" aria-label="Format text">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M14.06 9l.94-2.06L17.06 6l-2.06-.94L14.06 3l-.94 2.06L11.06 6l2.06.94zM4 14l.94-2.06L7 11l-2.06-.94L4 8l-.94 2.06L1 11l2.06.94zm4.5-5l1.09-2.41L12 5.5 9.59 4.41 8.5 2 7.41 4.41 5 5.5l2.41 1.09L8.5 9zm-4 11.5l6-6.01 4 4L23 8.93l-1.41-1.41-7.09 7.97-4-4L3 19z"/>
             </svg>
-        </button>
-        <button class="fab fab-primary" onclick="publish()" aria-label="Publish post">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-            </svg>
-            Publish
         </button>
     </div>
 
@@ -856,6 +860,7 @@
         let accessToken = null;
         let blogs = [];
         let lastSelection = null;
+        let snackbarTimeout = null;
 
         // ═══ GOOGLE AUTH ═══
         function loadGoogleAPI() {
@@ -945,6 +950,23 @@
         function insertHTML(html) {
             restoreSelection();
             document.execCommand('insertHTML', false, html);
+        }
+
+        // ═══ PASTE AS PLAIN TEXT ═══
+        function handlePaste(e) {
+            e.preventDefault();
+            
+            // Get plain text from clipboard
+            const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+            
+            // Insert as plain text without any formatting
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            selection.deleteFromRange(selection.getRangeAt(0));
+            
+            // Insert plain text
+            document.execCommand('insertText', false, text);
         }
 
         // ═══ BOTTOM SHEET ═══
@@ -1123,14 +1145,43 @@
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
         }
 
-        // ═══ SNACKBAR ═══
+        // ═══ SNACKBAR (FIXED VERSION) ═══
         function showSnackbar(message, type = 'info') {
             const snackbar = document.getElementById('snackbar');
-            snackbar.textContent = message;
-            snackbar.classList.add('show');
-            setTimeout(() => {
+            
+            // Clear any existing timeout
+            if (snackbarTimeout) {
+                clearTimeout(snackbarTimeout);
+            }
+            
+            // Remove show class first if it exists
+            if (snackbar.classList.contains('show')) {
                 snackbar.classList.remove('show');
-            }, 3000);
+                
+                // Wait for fade out animation
+                setTimeout(() => {
+                    displaySnackbar(snackbar, message);
+                }, 350);
+            } else {
+                displaySnackbar(snackbar, message);
+            }
+        }
+
+        function displaySnackbar(snackbar, message) {
+            snackbar.textContent = message;
+            
+            // Small delay to ensure CSS transition triggers
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    snackbar.classList.add('show');
+                    
+                    // Auto-hide after 3 seconds
+                    snackbarTimeout = setTimeout(() => {
+                        snackbar.classList.remove('show');
+                        snackbarTimeout = null;
+                    }, 3000);
+                });
+            });
         }
 
         // ═══ EVENT LISTENERS ═══
@@ -1147,6 +1198,9 @@
             const editor = document.getElementById('editor');
             editor.addEventListener('mouseup', saveSelection);
             editor.addEventListener('keyup', saveSelection);
+            
+            // PASTE AS PLAIN TEXT EVENT
+            editor.addEventListener('paste', handlePaste);
 
             // Close bottom sheet on swipe down
             let touchStartY = 0;
