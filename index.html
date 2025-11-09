@@ -1028,7 +1028,9 @@
                 return;
             }
             insertHTML(`<div style="text-align:center;margin:16px 0;">
-                <img src="${url}" alt="${alt || 'Image'}" style="max-width:100%;border-radius:12px;">
+                <a href="${url}">
+                    <img src="${url}" alt="${alt || 'Image'}" style="max-width:100%;border-radius:12px;cursor:pointer;">
+                </a>
             </div><p><br></p>`);
             closeModal();
             document.getElementById('imageUrl').value = '';
